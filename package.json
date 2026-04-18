@@ -1,0 +1,146 @@
+{
+    "author": "Octagoncow",
+    "dependencies": {},
+    "keywords": [
+        "pebble-Watch"
+    ],
+    "name": "blade-split",
+    "pebble": {
+        "displayName": "Blade Split",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "dummy"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/SuperBrigade.ttf",
+                    "name": "FONT_SUPER_BRIGADE_20",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/SuperBrigade.ttf",
+                    "name": "FONT_SUPER_BRIGADE_16",
+                    "type": "font"
+                },
+                {
+                    "file": "images/Blade.png",
+                    "name": "IMAGE_BACKGROUND",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_0.png",
+                    "name": "IMAGE_NUM_0",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_1.png",
+                    "name": "IMAGE_NUM_1",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_2.png",
+                    "name": "IMAGE_NUM_2",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_0_blue.png",
+                    "name": "IMAGE_NUM_0_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_1_blue.png",
+                    "name": "IMAGE_NUM_1_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_2_blue.png",
+                    "name": "IMAGE_NUM_2_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_9.png",
+                    "name": "IMAGE_NUM_9",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_6_blue.png",
+                    "name": "IMAGE_NUM_6_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_7_blue.png",
+                    "name": "IMAGE_NUM_7_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_8_blue.png",
+                    "name": "IMAGE_NUM_8_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_9_blue.png",
+                    "name": "IMAGE_NUM_9_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_3.png",
+                    "name": "IMAGE_NUM_3",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_3_blue.png",
+                    "name": "IMAGE_NUM_3_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_4.png",
+                    "name": "IMAGE_NUM_4",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_4_blue.png",
+                    "name": "IMAGE_NUM_4_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_5.png",
+                    "name": "IMAGE_NUM_5",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_5_blue.png",
+                    "name": "IMAGE_NUM_5_BLUE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_6.png",
+                    "name": "IMAGE_NUM_6",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_7.png",
+                    "name": "IMAGE_NUM_7",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_8.png",
+                    "name": "IMAGE_NUM_8",
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt"
+        ],
+        "uuid": "12e8dfec-f47c-42a2-8b53-0600182f1d93",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.0.0"
+}
