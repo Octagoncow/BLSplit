@@ -15,127 +15,61 @@
         "resources": {
             "media": [
                 {
-                    "compatibility": "2.7",
-                    "file": "fonts/SuperBrigade.ttf",
-                    "name": "FONT_SUPER_BRIGADE_20",
+                    "characterRegex": "[0-9]",
+                    "file": "fonts/SairaStencilOne-Regular.ttf",
+                    "name": "FONT_SAIRA_STENCIL_99",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
                     "type": "font"
                 },
                 {
-                    "compatibility": "2.7",
-                    "file": "fonts/SuperBrigade.ttf",
-                    "name": "FONT_SUPER_BRIGADE_16",
+                    "characterRegex": "[0-9]",
+                    "file": "fonts/SairaStencilOne-Regular.ttf",
+                    "name": "FONT_SAIRA_STENCIL_69",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/SairaStencilOne-Regular.ttf",
+                    "name": "FONT_SAIRA_STENCIL_16",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/SairaStencilOne-Regular.ttf",
+                    "name": "FONT_SAIRA_STENCIL_28",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
                     "type": "font"
                 },
                 {
                     "file": "images/Blade.png",
                     "name": "IMAGE_BACKGROUND",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/num_0.png",
-                    "name": "IMAGE_NUM_0",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_1.png",
-                    "name": "IMAGE_NUM_1",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_2.png",
-                    "name": "IMAGE_NUM_2",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_0_blue.png",
-                    "name": "IMAGE_NUM_0_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_1_blue.png",
-                    "name": "IMAGE_NUM_1_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_2_blue.png",
-                    "name": "IMAGE_NUM_2_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_9.png",
-                    "name": "IMAGE_NUM_9",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_6_blue.png",
-                    "name": "IMAGE_NUM_6_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_7_blue.png",
-                    "name": "IMAGE_NUM_7_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_8_blue.png",
-                    "name": "IMAGE_NUM_8_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_9_blue.png",
-                    "name": "IMAGE_NUM_9_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_3.png",
-                    "name": "IMAGE_NUM_3",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_3_blue.png",
-                    "name": "IMAGE_NUM_3_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_4.png",
-                    "name": "IMAGE_NUM_4",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_4_blue.png",
-                    "name": "IMAGE_NUM_4_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_5.png",
-                    "name": "IMAGE_NUM_5",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_5_blue.png",
-                    "name": "IMAGE_NUM_5_BLUE",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_6.png",
-                    "name": "IMAGE_NUM_6",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_7.png",
-                    "name": "IMAGE_NUM_7",
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/num_8.png",
-                    "name": "IMAGE_NUM_8",
+                    "file": "images/BladeEmery.png",
+                    "name": "IMAGE_BACKGROUND",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
                     "type": "bitmap"
                 }
             ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "basalt"
+            "basalt",
+            "emery"
         ],
         "uuid": "12e8dfec-f47c-42a2-8b53-0600182f1d93",
         "watchapp": {
