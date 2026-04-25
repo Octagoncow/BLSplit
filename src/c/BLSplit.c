@@ -46,15 +46,11 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
 
 static void bluetooth_callback(bool connected) 
 {
-  if (connected && !btPreviouslyConnected) 
-  {
-    bitmap_layer_set_bitmap(s_blade_layer, s_blade_bitmap);
-  }
-	else if(btPreviouslyConnected)
-	{
-		bitmap_layer_set_bitmap(s_blade_layer, s_blade_no_bt_bitmap);
-	}
-	btPreviouslyConnected = connected;
+    if (connected == btPreviouslyConnected) return; // no change
+	
+    btPreviouslyConnected = connected;
+	//set the blade image to be yellow if connected or gray if disconnected
+    bitmap_layer_set_bitmap(s_blade_layer, connected ? s_blade_bitmap : s_blade_no_bt_bitmap);
 }
 
 
