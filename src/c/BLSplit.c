@@ -22,7 +22,7 @@ static ClaySettings settings;
 static Window *s_main_window;
 static Layer *s_window_layer, *s_hours_layer, *s_minutes_layer, *s_progress_layer;
 static TextLayer *s_battery_layer, *s_date_layer;
-static GFont s_battery_font, s_date_font, s_time_font;
+static GFont s_battery_font, s_date_font;
 static BitmapLayer *s_blade_layer;
 static bool btPreviouslyConnected = true;
 //'normal' blade image
@@ -33,11 +33,11 @@ static GBitmap *s_blade_no_bt_bitmap;
 static int s_hours_val = 0, s_minutes_val = 0, s_battery_lvl = 0, s_step_count = 0;
 
 static void hours_update_proc(Layer *layer, GContext *ctx) {
-    digit_renderer_draw_hours(ctx, layer_get_bounds(layer), s_hours_val, settings.HourColor, s_time_font);
+    digit_renderer_draw_hours(ctx, layer_get_bounds(layer), s_hours_val);
 }
 
 static void minutes_update_proc(Layer *layer, GContext *ctx) {
-    digit_renderer_draw_minutes(ctx, layer_get_bounds(layer), s_minutes_val, settings.MinuteColor, s_time_font);
+    digit_renderer_draw_minutes(ctx, layer_get_bounds(layer), s_minutes_val);
 }
 
 static void progress_update_proc(Layer *layer, GContext *ctx) {
@@ -174,9 +174,6 @@ static void window_unload(Window *window)
     digit_renderer_deinit();
     fonts_unload_custom_font(s_battery_font);
     fonts_unload_custom_font(s_date_font);
-#if !defined(PBL_PLATFORM_EMERY)
-    fonts_unload_custom_font(s_time_font);
-#endif
     layer_destroy(s_hours_layer);
     layer_destroy(s_minutes_layer);
     text_layer_destroy(s_battery_layer);

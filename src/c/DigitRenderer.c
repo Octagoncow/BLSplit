@@ -38,7 +38,7 @@ int digit_renderer_get_digit_width()
     return s_digit_w;
 }
 
-void digit_renderer_draw_hours(GContext *ctx, GRect bounds, int value, GColor fallback_color, GFont fallback_font) 
+void digit_renderer_draw_hours(GContext *ctx, GRect bounds, int value) 
 {
     if (!s_spritesheet) 
 	{
@@ -59,7 +59,7 @@ void digit_renderer_draw_hours(GContext *ctx, GRect bounds, int value, GColor fa
     gbitmap_destroy(sub);
 }
 
-void digit_renderer_draw_minutes(GContext *ctx, GRect bounds, int value, GColor fallback_color, GFont fallback_font) 
+void digit_renderer_draw_minutes(GContext *ctx, GRect bounds, int value) 
 {
     if (!s_spritesheet) 
 	{
