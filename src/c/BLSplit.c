@@ -24,7 +24,11 @@ static Layer *s_window_layer, *s_hours_layer, *s_minutes_layer, *s_progress_laye
 static TextLayer *s_battery_layer, *s_date_layer;
 static GFont s_battery_font, s_date_font, s_time_font;
 static BitmapLayer *s_blade_layer;
+static bool btPreviouslyConnected = true;
+//'normal' blade image
 static GBitmap *s_blade_bitmap;
+//no Bluetooth blade image
+static GBitmap *s_blade_no_bt_bitmap;
 
 static int s_hours_val = 0, s_minutes_val = 0, s_battery_lvl = 0, s_step_count = 0;
 
@@ -39,6 +43,20 @@ static void minutes_update_proc(Layer *layer, GContext *ctx) {
 static void progress_update_proc(Layer *layer, GContext *ctx) {
     progress_bar_draw(ctx, layer_get_bounds(layer), s_step_count, settings.StepGoal, settings.StepsColor, settings.BackgroundColor, (int)EDGE_PADDING, 10);
 }
+
+static void bluetooth_callback(bool connected) 
+{
+  if (connected && !btPreviouslyConnected) 
+  {
+    bitmap_layer_set_bitmap(s_blade_layer, s_blade_bitmap);
+  }
+	else if(btPreviouslyConnected)
+	{
+		bitmap_layer_set_bitmap(s_blade_layer, s_blade_no_bt_bitmap);
+	}
+	btPreviouslyConnected = connected;
+}
+
 
 static void update_time() {
     time_t now = time(NULL);
@@ -140,6 +158,7 @@ static void window_load(Window *window)
     layer_add_child(s_window_layer, text_layer_get_layer(s_battery_layer));
 	
     s_blade_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BACKGROUND);
+	s_blade_no_bt_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BACKGROUND_NO_BT);
 
     s_blade_layer = bitmap_layer_create(bounds);
     bitmap_layer_set_bitmap(s_blade_layer, s_blade_bitmap);
@@ -163,6 +182,7 @@ static void window_unload(Window *window)
     text_layer_destroy(s_battery_layer);
     text_layer_destroy(s_date_layer);
     gbitmap_destroy(s_blade_bitmap);
+	gbitmap_destroy(s_blade_no_bt_bitmap);
     bitmap_layer_destroy(s_blade_layer);
     layer_destroy(s_progress_layer);
 }
@@ -200,6 +220,10 @@ int main(void)
     
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     battery_state_service_subscribe(battery_handler);
+	
+	// Register for Bluetooth connection updates
+connection_service_subscribe((ConnectionHandlers) { .pebble_app_connection_handler = bluetooth_callback});
+
     
     app_event_loop();
 }

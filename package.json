@@ -77,6 +77,22 @@
                         "basalt"
                     ],
                     "type": "bitmap"
+                },
+                {
+                    "file": "images/BladeEmeryNoBT.png",
+                    "name": "IMAGE_BACKGROUND_NO_BT",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/BladeNoBT.png",
+                    "name": "IMAGE_BACKGROUND_NO_BT",
+                    "targetPlatforms": [
+                        "basalt"
+                    ],
+                    "type": "bitmap"
                 }
             ]
         },
