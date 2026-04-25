@@ -31,18 +31,8 @@
         "resources": {
             "media": [
                 {
-                    "characterRegex": "[0-9]",
                     "file": "fonts/SairaStencilOne-Regular.ttf",
-                    "name": "FONT_SAIRA_STENCIL_99",
-                    "targetPlatforms": [
-                        "emery"
-                    ],
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9]",
-                    "file": "fonts/SairaStencilOne-Regular.ttf",
-                    "name": "FONT_SAIRA_STENCIL_69",
+                    "name": "FONT_SAIRA_STENCIL_18",
                     "targetPlatforms": [
                         "basalt"
                     ],
@@ -50,15 +40,7 @@
                 },
                 {
                     "file": "fonts/SairaStencilOne-Regular.ttf",
-                    "name": "FONT_SAIRA_STENCIL_16",
-                    "targetPlatforms": [
-                        "basalt"
-                    ],
-                    "type": "font"
-                },
-                {
-                    "file": "fonts/SairaStencilOne-Regular.ttf",
-                    "name": "FONT_SAIRA_STENCIL_28",
+                    "name": "FONT_SAIRA_STENCIL_24",
                     "targetPlatforms": [
                         "emery"
                     ],
@@ -77,6 +59,22 @@
                     "name": "IMAGE_BACKGROUND",
                     "targetPlatforms": [
                         "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/spritesheet_emery_SairaStencilOne-Regular_100.png",
+                    "name": "SPRITE_SHEET_SAIRA_STENCIL",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/spritesheet_basalt_SairaStencilOne-Regular_70.png",
+                    "name": "SPRITE_SHEET_SAIRA_STENCIL",
+                    "targetPlatforms": [
+                        "basalt"
                     ],
                     "type": "bitmap"
                 }
