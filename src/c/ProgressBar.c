@@ -1,6 +1,7 @@
 #include "ProgressBar.h"
 
-void progress_bar_draw(GContext *ctx, GRect bounds, int steps, int goal, GColor color, GColor bg_color, int padding, int corner_radius) {
+void progress_bar_draw(GContext *ctx, GRect bounds, int steps, int goal, GColor color, GColor bg_color, int padding, int corner_radius) 
+{
     if (goal <= 0) return;
 
     int bw = padding / 2;
@@ -22,7 +23,8 @@ void progress_bar_draw(GContext *ctx, GRect bounds, int steps, int goal, GColor 
     graphics_fill_rect(ctx, inner_bounds, inner_radius, GCornersAll);
 
     // 3. Mask out the unreached portion using a sweeping radial fill
-    if (capped_steps < goal) {
+    if (capped_steps < goal) 
+	{
         graphics_context_set_fill_color(ctx, bg_color);
 
         // Starting angle offset (225 degrees is roughly the bottom-left corner)

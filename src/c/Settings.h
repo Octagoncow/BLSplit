@@ -1,7 +1,8 @@
 #pragma once
 #include <pebble.h>
 
-typedef struct ClaySettings {
+typedef struct ClaySettings 
+{
     GColor BackgroundColor;
     GColor HourColor;
     GColor MinuteColor;

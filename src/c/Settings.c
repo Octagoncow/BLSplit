@@ -2,7 +2,8 @@
 
 #define SETTINGS_KEY 1
 
-void settings_load(ClaySettings *settings) {
+void settings_load(ClaySettings *settings) 
+{
 	//***REMEMBER TO UPDATE ClaySettings STRUCT IN HEADER FILE!***
     // Default values
     settings->BackgroundColor  = GColorBlack;
@@ -15,11 +16,13 @@ void settings_load(ClaySettings *settings) {
 	settings->ShowBTConnection = true;
     settings->StepGoal         = 8000;
 
-    if (persist_exists(SETTINGS_KEY)) {
+    if (persist_exists(SETTINGS_KEY)) 
+	{
         persist_read_data(SETTINGS_KEY, settings, sizeof(ClaySettings));
     }
 }
 
-void settings_save(ClaySettings *settings) {
+void settings_save(ClaySettings *settings) 
+{
     persist_write_data(SETTINGS_KEY, settings, sizeof(ClaySettings));
 }

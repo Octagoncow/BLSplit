@@ -32,15 +32,18 @@ static GBitmap *s_blade_no_bt_bitmap;
 
 static int s_hours_val = 0, s_minutes_val = 0, s_day_val = 0, s_battery_lvl = 0, s_step_count = 0;
 
-static void hours_update_proc(Layer *layer, GContext *ctx) {
+static void hours_update_proc(Layer *layer, GContext *ctx) 
+{
     digit_renderer_draw_hours(ctx, layer_get_bounds(layer), s_hours_val);
 }
 
-static void minutes_update_proc(Layer *layer, GContext *ctx) {
+static void minutes_update_proc(Layer *layer, GContext *ctx) 
+{
     digit_renderer_draw_minutes(ctx, layer_get_bounds(layer), s_minutes_val);
 }
 
-static void progress_update_proc(Layer *layer, GContext *ctx) {
+static void progress_update_proc(Layer *layer, GContext *ctx) 
+{
     progress_bar_draw(ctx, layer_get_bounds(layer), s_step_count, settings.StepGoal, settings.StepsColor, settings.BackgroundColor, (int)EDGE_PADDING, 10);
 }
 
@@ -128,14 +131,20 @@ static void battery_handler(BatteryChargeState state)
 
 static void ApplySettings()
 {
+	GRect full_bounds = layer_get_bounds(s_window_layer);
+GRect current_bounds = layer_get_unobstructed_bounds(s_window_layer);
+bool is_obstructed = !grect_equal(&full_bounds, &current_bounds);
+	
 	// Apply color settings
     window_set_background_color(s_main_window, settings.BackgroundColor);
     text_layer_set_text_color(s_date_layer,    settings.DateColor);
     text_layer_set_text_color(s_battery_layer, settings.BatteryColor);
 
     // Apply visibility settings
-    layer_set_hidden(text_layer_get_layer(s_date_layer),    !settings.ShowDate);
-    layer_set_hidden(text_layer_get_layer(s_battery_layer), !settings.ShowBattery);
+layer_set_hidden(text_layer_get_layer(s_date_layer),
+    !settings.ShowDate || is_obstructed);
+layer_set_hidden(text_layer_get_layer(s_battery_layer),
+    !settings.ShowBattery || is_obstructed);
     layer_set_hidden(s_progress_layer,                      !settings.ShowStepProgress);
 	
 	// Apply Bluetooth visibility
@@ -155,6 +164,39 @@ static void ApplySettings()
 
     // Redraw the progress bar since color or goal may have changed
     layer_mark_dirty(s_progress_layer);
+}
+
+static void prv_unobstructed_will_change(GRect final_unobstructed_screen_area, void *context) 
+{
+    // Hide date and battery before the peek animation starts
+    layer_set_hidden(text_layer_get_layer(s_date_layer), true);
+    layer_set_hidden(text_layer_get_layer(s_battery_layer), true);
+}
+
+static void prv_unobstructed_change(AnimationProgress progress, void *context) 
+{
+    // Called repeatedly during the animation — move minutes to track the shrinking screen
+    GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+    int digit_h = digit_renderer_get_digit_height();
+
+    GRect minutes_frame = layer_get_frame(s_minutes_layer);
+    minutes_frame.origin.y = bounds.size.h - EDGE_PADDING - digit_h;
+    layer_set_frame(s_minutes_layer, minutes_frame);
+}
+
+static void prv_unobstructed_did_change(void *context) 
+{
+    // Called once after the animation finishes
+    GRect full_bounds = layer_get_bounds(s_window_layer);
+    GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+    bool obstructed = !grect_equal(&full_bounds, &bounds);
+
+    if (!obstructed) 
+	{
+        // Peek is gone. restore date/battery based on user settings
+        layer_set_hidden(text_layer_get_layer(s_date_layer),    !settings.ShowDate);
+        layer_set_hidden(text_layer_get_layer(s_battery_layer), !settings.ShowBattery);
+    }
 }
 
 static void window_load(Window *window) 
@@ -219,6 +261,19 @@ static void window_load(Window *window)
 
     update_time();
     battery_handler(battery_state_service_peek());
+	
+	// Subscribe to unobstructed area events
+UnobstructedAreaHandlers unobstructed_handlers = 
+{
+    .will_change = prv_unobstructed_will_change,
+    .change      = prv_unobstructed_change,
+    .did_change  = prv_unobstructed_did_change
+};
+unobstructed_area_service_subscribe(unobstructed_handlers, NULL);
+
+// Handle the case where Timeline Peek is ALREADY active when the face loads
+prv_unobstructed_change(0, NULL);
+prv_unobstructed_did_change(NULL);
 }
 
 static void window_unload(Window *window) 
@@ -237,6 +292,7 @@ static void window_unload(Window *window)
 	tick_timer_service_unsubscribe();
     battery_state_service_unsubscribe();
     connection_service_unsubscribe();
+	unobstructed_area_service_unsubscribe();
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *ctx) 
@@ -277,10 +333,11 @@ int main(void)
 	
 	window_set_background_color(s_main_window, settings.BackgroundColor);
 	
-    window_set_window_handlers(s_main_window, (WindowHandlers) { 
-        .load = window_load, 
-        .unload = window_unload 
-    });
+    window_set_window_handlers(s_main_window, (WindowHandlers) 
+							   { 
+									.load = window_load, 
+									.unload = window_unload 
+								});
     
     window_stack_push(s_main_window, true);
     
