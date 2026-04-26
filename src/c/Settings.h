@@ -11,8 +11,8 @@ typedef struct ClaySettings {
     bool ShowDate;
     bool ShowBattery;
     bool ShowStepProgress;
+	bool ShowBTConnection;
     int StepGoal;
-    bool MetricSteps;
 } ClaySettings;
 
 void settings_load(ClaySettings *settings);

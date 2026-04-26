@@ -30,7 +30,7 @@ static GBitmap *s_blade_bitmap;
 //no Bluetooth blade image
 static GBitmap *s_blade_no_bt_bitmap;
 
-static int s_hours_val = 0, s_minutes_val = 0, s_battery_lvl = 0, s_step_count = 0;
+static int s_hours_val = 0, s_minutes_val = 0, s_day_val = 0, s_battery_lvl = 0, s_step_count = 0;
 
 static void hours_update_proc(Layer *layer, GContext *ctx) {
     digit_renderer_draw_hours(ctx, layer_get_bounds(layer), s_hours_val);
@@ -46,7 +46,7 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
 
 static void bluetooth_callback(bool connected) 
 {
-    if (connected == btPreviouslyConnected) return; // no change
+    if (connected == btPreviouslyConnected || !settings.ShowBTConnection) return; // no change
 	
     btPreviouslyConnected = connected;
 	//set the blade image to be yellow if connected or gray if disconnected
@@ -54,22 +54,39 @@ static void bluetooth_callback(bool connected)
 }
 
 
-static void update_time() {
-    time_t now = time(NULL);
+static void update_time() 
+{
+	time_t now = time(NULL);
     struct tm *t = localtime(&now);
-    s_hours_val = clock_is_24h_style() ? t->tm_hour : (t->tm_hour % 12 ? t->tm_hour % 12 : 12);
-    s_minutes_val = t->tm_min;
-    
-    static char d_buf[7];
-    strftime(d_buf, sizeof(d_buf), "%a\n%d", t);
-    text_layer_set_text(s_date_layer, d_buf);
-    
-    layer_mark_dirty(s_hours_layer);
-    layer_mark_dirty(s_minutes_layer);
+
+    int new_hours = clock_is_24h_style() ? t->tm_hour : (t->tm_hour % 12 ? t->tm_hour % 12 : 12);
+    int new_minutes = t->tm_min;
+	int new_day = t->tm_mday;
+
+    if (new_hours != s_hours_val) 
+	{
+        s_hours_val = new_hours;
+        layer_mark_dirty(s_hours_layer);
+    }
+
+    if (new_minutes != s_minutes_val) 
+	{
+        s_minutes_val = new_minutes;
+        layer_mark_dirty(s_minutes_layer);
+    }
+	
+	if(new_day != s_day_val)
+	{
+		s_day_val = new_day;
+		static char d_buf[7];
+    	strftime(d_buf, sizeof(d_buf), "%a\n%d", t);
+    	text_layer_set_text(s_date_layer, d_buf);
+	}
 }
 
 static void update_steps() 
 {
+	int new_steps = 0;
     #ifdef DEBUG
 	s_step_count = 4567;
 	#else
@@ -81,16 +98,24 @@ static void update_steps()
 
 	if (mask & HealthServiceAccessibilityMaskAvailable) 
 	{
-		s_step_count = (int)health_service_sum(metric, start, end);
+		new_steps = (int)health_service_sum(metric, start, end);
 	}
 	#endif
-    layer_mark_dirty(s_progress_layer);
+    if (new_steps != s_step_count) 
+	{
+        s_step_count = new_steps;
+        layer_mark_dirty(s_progress_layer);
+    }
 }
 
 static void tick_handler(struct tm *t, TimeUnits units) 
 {
     update_time();
-    update_steps();
+	 // only every 5 minutes
+	if (t->tm_min % 5 == 0) 
+	{
+        update_steps();
+    }
 }
 
 static void battery_handler(BatteryChargeState state) 
@@ -99,6 +124,37 @@ static void battery_handler(BatteryChargeState state)
     static char b_buf[5];
     snprintf(b_buf, sizeof(b_buf), "%d%%", s_battery_lvl);
     text_layer_set_text(s_battery_layer, b_buf);
+}
+
+static void ApplySettings()
+{
+	// Apply color settings
+    window_set_background_color(s_main_window, settings.BackgroundColor);
+    text_layer_set_text_color(s_date_layer,    settings.DateColor);
+    text_layer_set_text_color(s_battery_layer, settings.BatteryColor);
+
+    // Apply visibility settings
+    layer_set_hidden(text_layer_get_layer(s_date_layer),    !settings.ShowDate);
+    layer_set_hidden(text_layer_get_layer(s_battery_layer), !settings.ShowBattery);
+    layer_set_hidden(s_progress_layer,                      !settings.ShowStepProgress);
+	
+	// Apply Bluetooth visibility
+    if (settings.ShowBTConnection) 
+	{
+		connection_service_subscribe((ConnectionHandlers) 
+									 { 
+										 .pebble_app_connection_handler = bluetooth_callback 
+									 });
+		bluetooth_callback(connection_service_peek_pebble_app_connection());
+	}
+	else 
+	{
+		connection_service_unsubscribe();
+		bitmap_layer_set_bitmap(s_blade_layer, s_blade_bitmap);
+	}
+
+    // Redraw the progress bar since color or goal may have changed
+    layer_mark_dirty(s_progress_layer);
 }
 
 static void window_load(Window *window) 
@@ -137,7 +193,6 @@ static void window_load(Window *window)
     int date_y = hours_frame.origin.y + hours_frame.size.h + DATE_OFFSET;
     s_date_layer = text_layer_create(GRect(hours_frame.origin.x + EDGE_PADDING, date_y, pair_w, 60));
     text_layer_set_background_color(s_date_layer, GColorClear);
-    text_layer_set_text_color(s_date_layer, GColorWhite);
     text_layer_set_font(s_date_layer, s_date_font);
     text_layer_set_text_alignment(s_date_layer, GTextAlignmentLeft);
     layer_add_child(s_window_layer, text_layer_get_layer(s_date_layer));
@@ -148,7 +203,6 @@ static void window_load(Window *window)
     int battery_y = minutes_frame.origin.y - battery_h - BATTERY_OFFSET;
     s_battery_layer = text_layer_create(GRect(minutes_frame.origin.x-EDGE_PADDING, battery_y, pair_w, battery_h));
     text_layer_set_background_color(s_battery_layer, GColorClear);
-    text_layer_set_text_color(s_battery_layer, GColorVeryLightBlue);
     text_layer_set_font(s_battery_layer, s_battery_font);
     text_layer_set_text_alignment(s_battery_layer, GTextAlignmentRight);
     layer_add_child(s_window_layer, text_layer_get_layer(s_battery_layer));
@@ -160,6 +214,8 @@ static void window_load(Window *window)
     bitmap_layer_set_bitmap(s_blade_layer, s_blade_bitmap);
     bitmap_layer_set_compositing_mode(s_blade_layer, GCompOpSet);
     layer_add_child(s_window_layer, bitmap_layer_get_layer(s_blade_layer));
+	
+	ApplySettings();
 
     update_time();
     battery_handler(battery_state_service_peek());
@@ -178,19 +234,36 @@ static void window_unload(Window *window)
 	gbitmap_destroy(s_blade_no_bt_bitmap);
     bitmap_layer_destroy(s_blade_layer);
     layer_destroy(s_progress_layer);
+	tick_timer_service_unsubscribe();
+    battery_state_service_unsubscribe();
+    connection_service_unsubscribe();
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *ctx) 
 {
     Tuple *t = dict_read_first(iter);
     while (t) 
-	{
-        if (t->key == MESSAGE_KEY_BackgroundColor) settings.BackgroundColor = GColorFromHEX(t->value->int32);
-        if (t->key == MESSAGE_KEY_HourColor) settings.HourColor = GColorFromHEX(t->value->int32);
+    {
+        // Colors
+        if (t->key == MESSAGE_KEY_BackgroundColor)  settings.BackgroundColor  = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_DateColor)        settings.DateColor        = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_BatteryColor)     settings.BatteryColor     = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_StepsColor)       settings.StepsColor       = GColorFromHEX(t->value->int32);
+        // Visibility toggles
+        if (t->key == MESSAGE_KEY_ShowDate)         settings.ShowDate         = (bool)t->value->int8;
+        if (t->key == MESSAGE_KEY_ShowBattery)      settings.ShowBattery      = (bool)t->value->int8;
+        if (t->key == MESSAGE_KEY_ShowStepProgress) settings.ShowStepProgress = (bool)t->value->int8;
+		if (t->key == MESSAGE_KEY_ShowBTConnection) settings.ShowBTConnection = (bool)t->value->int8;
+        // Health
+        if (t->key == MESSAGE_KEY_StepGoal)         settings.StepGoal         = (int)t->value->int32;
+		
         t = dict_read_next(iter);
     }
+
     settings_save(&settings);
-    window_set_background_color(s_main_window, settings.BackgroundColor);
+	
+	//Apply the settings that were just read in
+    ApplySettings();
 }
 
 int main(void) 
@@ -213,10 +286,8 @@ int main(void)
     
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     battery_state_service_subscribe(battery_handler);
-	
+	update_steps();
 	// Register for Bluetooth connection updates
-connection_service_subscribe((ConnectionHandlers) { .pebble_app_connection_handler = bluetooth_callback});
-
-    
+	connection_service_subscribe((ConnectionHandlers) { .pebble_app_connection_handler = bluetooth_callback});
     app_event_loop();
 }

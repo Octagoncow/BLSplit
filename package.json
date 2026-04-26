@@ -24,8 +24,8 @@
             "ShowDate",
             "ShowBattery",
             "ShowStepProgress",
-            "StepGoal",
-            "MetricSteps"
+            "ShowBTConnection",
+            "StepGoal"
         ],
         "projectType": "native",
         "resources": {

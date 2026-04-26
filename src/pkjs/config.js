@@ -20,31 +20,19 @@ module.exports = [
         "defaultValue": "0x000000",
         "label": "Background Color"
       },
-      {
-        "type": "color",
-        "messageKey": "HourColor",
-        "defaultValue": "0xFFFFFF",
-        "label": "Hours Color"
-      },
-			{
-        "type": "color",
-        "messageKey": "MinuteColor",
-        "defaultValue": "0x5500FF",
-        "label": "Minutes Color"
-      },
-			{
+	{
         "type": "color",
         "messageKey": "DateColor",
         "defaultValue": "0xFFFFFF",
         "label": "Date Color"
       },
-			{
+		{
         "type": "color",
         "messageKey": "BatteryColor",
         "defaultValue": "0x5500FF",
         "label": "Battery % Color"
       },
-			{
+		{
         "type": "color",
         "messageKey": "StepsColor",
         "defaultValue": "0xFF5500",
@@ -71,10 +59,16 @@ module.exports = [
         "label": "Show Battery %",
         "defaultValue": true
       },
-			{
+		{
         "type": "toggle",
         "messageKey": "ShowStepProgress",
         "label": "Show Step Goal Progress",
+        "defaultValue": true
+      },
+		{
+        "type": "toggle",
+        "messageKey": "ShowBTConnection",
+        "label": "Change Blade Color on BT Disconnect",
         "defaultValue": true
       }
     ]
@@ -99,13 +93,7 @@ module.exports = [
 					"max": 30000,
 					"placeholder": "Enter step goal"
 				}
-			},
-      {
-        "type": "toggle",
-        "messageKey": "MetricSteps",
-        "label": "use metric steps",
-        "defaultValue": false
-      }
+			}
     ]
   },
   {
