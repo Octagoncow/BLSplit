@@ -56,6 +56,29 @@ static void bluetooth_callback(bool connected)
     bitmap_layer_set_bitmap(s_blade_layer, connected ? s_blade_bitmap : s_blade_no_bt_bitmap);
 }
 
+static bool IsScreenObstructed()
+{
+    GRect full_bounds = layer_get_bounds(s_window_layer);
+    GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
+    return !grect_equal(&full_bounds, &unobstructed_bounds);
+}
+
+static void SetDateAndBatteryVisiblity()
+{
+    bool obstructed = IsScreenObstructed();
+    layer_set_hidden(text_layer_get_layer(s_date_layer),    !settings.ShowDate    || obstructed);
+    layer_set_hidden(text_layer_get_layer(s_battery_layer), !settings.ShowBattery || obstructed);
+}
+
+static void UpdateMinutesPosition()
+{
+    GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+    int digit_h = digit_renderer_get_digit_height();
+    GRect minutes_frame = layer_get_frame(s_minutes_layer);
+    minutes_frame.origin.y = bounds.size.h - EDGE_PADDING - digit_h;
+    layer_set_frame(s_minutes_layer, minutes_frame);
+}
+
 
 static void update_time() 
 {
@@ -130,22 +153,15 @@ static void battery_handler(BatteryChargeState state)
 }
 
 static void ApplySettings()
-{
-	GRect full_bounds = layer_get_bounds(s_window_layer);
-GRect current_bounds = layer_get_unobstructed_bounds(s_window_layer);
-bool is_obstructed = !grect_equal(&full_bounds, &current_bounds);
-	
+{	
 	// Apply color settings
     window_set_background_color(s_main_window, settings.BackgroundColor);
     text_layer_set_text_color(s_date_layer,    settings.DateColor);
     text_layer_set_text_color(s_battery_layer, settings.BatteryColor);
 
     // Apply visibility settings
-layer_set_hidden(text_layer_get_layer(s_date_layer),
-    !settings.ShowDate || is_obstructed);
-layer_set_hidden(text_layer_get_layer(s_battery_layer),
-    !settings.ShowBattery || is_obstructed);
-    layer_set_hidden(s_progress_layer,                      !settings.ShowStepProgress);
+	SetDateAndBatteryVisiblity();
+    layer_set_hidden(s_progress_layer, !settings.ShowStepProgress);
 	
 	// Apply Bluetooth visibility
     if (settings.ShowBTConnection) 
@@ -169,34 +185,19 @@ layer_set_hidden(text_layer_get_layer(s_battery_layer),
 static void prv_unobstructed_will_change(GRect final_unobstructed_screen_area, void *context) 
 {
     // Hide date and battery before the peek animation starts
-    layer_set_hidden(text_layer_get_layer(s_date_layer), true);
-    layer_set_hidden(text_layer_get_layer(s_battery_layer), true);
+    SetDateAndBatteryVisiblity();
 }
 
 static void prv_unobstructed_change(AnimationProgress progress, void *context) 
 {
-    // Called repeatedly during the animation — move minutes to track the shrinking screen
-    GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
-    int digit_h = digit_renderer_get_digit_height();
-
-    GRect minutes_frame = layer_get_frame(s_minutes_layer);
-    minutes_frame.origin.y = bounds.size.h - EDGE_PADDING - digit_h;
-    layer_set_frame(s_minutes_layer, minutes_frame);
+    // Called repeatedly during the animation. Move minutes to track the shrinking screen
+    UpdateMinutesPosition();
 }
 
 static void prv_unobstructed_did_change(void *context) 
 {
     // Called once after the animation finishes
-    GRect full_bounds = layer_get_bounds(s_window_layer);
-    GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
-    bool obstructed = !grect_equal(&full_bounds, &bounds);
-
-    if (!obstructed) 
-	{
-        // Peek is gone. restore date/battery based on user settings
-        layer_set_hidden(text_layer_get_layer(s_date_layer),    !settings.ShowDate);
-        layer_set_hidden(text_layer_get_layer(s_battery_layer), !settings.ShowBattery);
-    }
+    SetDateAndBatteryVisiblity();
 }
 
 static void window_load(Window *window) 
@@ -272,7 +273,7 @@ UnobstructedAreaHandlers unobstructed_handlers =
 unobstructed_area_service_subscribe(unobstructed_handlers, NULL);
 
 // Handle the case where Timeline Peek is ALREADY active when the face loads
-prv_unobstructed_change(0, NULL);
+UpdateMinutesPosition();
 prv_unobstructed_did_change(NULL);
 }
 
