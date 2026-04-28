@@ -8,6 +8,8 @@
 
 #define EDGE_PADDING 10
 
+#define UNINITIALIZED -1
+
 // Vertical gap between the hours layer and the date label beneath it,
 // and between the battery label and the minutes layer above it.
 #if defined(PBL_PLATFORM_EMERY)
@@ -25,12 +27,15 @@ static TextLayer *s_battery_layer, *s_date_layer;
 static GFont s_battery_font, s_date_font;
 static BitmapLayer *s_blade_layer;
 static bool btPreviouslyConnected = true;
+// Vibe pattern: ON for 200ms, OFF for 100ms, ON for 400ms:
+static const uint32_t stepGoalAchievedVibePattern[] = { 300, 100, 300, 100, 300, 600, 300, 100, 300, 100, 300};
+
 //'normal' blade image
 static GBitmap *s_blade_bitmap;
 //no Bluetooth blade image
 static GBitmap *s_blade_no_bt_bitmap;
 
-static int s_hours_val = 0, s_minutes_val = 0, s_day_val = 0, s_battery_lvl = 0, s_step_count = 0;
+static int s_hours_val = 0, s_minutes_val = 0, s_day_val = 0, s_battery_lvl = 0, s_step_count = UNINITIALIZED;
 
 static void hours_update_proc(Layer *layer, GContext *ctx) 
 {
@@ -129,8 +134,21 @@ static void update_steps()
 	#endif
     if (new_steps != s_step_count) 
 	{
+		//we've just met/surpassed our step goal for the day
+		if(settings.VibrateOnStepGoal && s_step_count != UNINITIALIZED && new_steps >= settings.StepGoal && s_step_count < settings.StepGoal)
+		{
+			//vibrate the watch
+			VibePattern pat = 
+			{
+			  .durations = stepGoalAchievedVibePattern,
+			  .num_segments = ARRAY_LENGTH(stepGoalAchievedVibePattern),
+			};
+			vibes_enqueue_custom_pattern(pat);
+
+		}
         s_step_count = new_steps;
         layer_mark_dirty(s_progress_layer);
+		
     }
 }
 
@@ -302,17 +320,18 @@ static void inbox_received_handler(DictionaryIterator *iter, void *ctx)
     while (t) 
     {
         // Colors
-        if (t->key == MESSAGE_KEY_BackgroundColor)  settings.BackgroundColor  = GColorFromHEX(t->value->int32);
-        if (t->key == MESSAGE_KEY_DateColor)        settings.DateColor        = GColorFromHEX(t->value->int32);
-        if (t->key == MESSAGE_KEY_BatteryColor)     settings.BatteryColor     = GColorFromHEX(t->value->int32);
-        if (t->key == MESSAGE_KEY_StepsColor)       settings.StepsColor       = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_BackgroundColor)   settings.BackgroundColor   = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_DateColor)         settings.DateColor         = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_BatteryColor)      settings.BatteryColor      = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_StepsColor)        settings.StepsColor        = GColorFromHEX(t->value->int32);
         // Visibility toggles
-        if (t->key == MESSAGE_KEY_ShowDate)         settings.ShowDate         = (bool)t->value->int8;
-        if (t->key == MESSAGE_KEY_ShowBattery)      settings.ShowBattery      = (bool)t->value->int8;
-        if (t->key == MESSAGE_KEY_ShowStepProgress) settings.ShowStepProgress = (bool)t->value->int8;
-		if (t->key == MESSAGE_KEY_ShowBTConnection) settings.ShowBTConnection = (bool)t->value->int8;
+        if (t->key == MESSAGE_KEY_ShowDate)          settings.ShowDate          = (bool)t->value->int8;
+        if (t->key == MESSAGE_KEY_ShowBattery)       settings.ShowBattery       = (bool)t->value->int8;
+        if (t->key == MESSAGE_KEY_ShowStepProgress)  settings.ShowStepProgress  = (bool)t->value->int8;
+		if (t->key == MESSAGE_KEY_ShowBTConnection)  settings.ShowBTConnection  = (bool)t->value->int8;
         // Health
-        if (t->key == MESSAGE_KEY_StepGoal)         settings.StepGoal         = (int)t->value->int32;
+        if (t->key == MESSAGE_KEY_StepGoal)          settings.StepGoal         	= (int)t->value->int32;
+		if (t->key == MESSAGE_KEY_VibrateOnStepGoal) settings.VibrateOnStepGoal = (bool)t->value->int8;
 		
         t = dict_read_next(iter);
     }

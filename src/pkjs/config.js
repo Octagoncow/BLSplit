@@ -93,7 +93,13 @@ module.exports = [
 					"max": 30000,
 					"placeholder": "Enter step goal"
 				}
-			}
+			},
+		{
+        "type": "toggle",
+        "messageKey": "VibrateOnStepGoal",
+        "label": "Vibrate On Step Goal",
+        "defaultValue": true
+      }
     ]
   },
   {

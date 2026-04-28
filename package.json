@@ -25,6 +25,7 @@
             "ShowBattery",
             "ShowStepProgress",
             "ShowBTConnection",
+            "VibrateOnStepGoal",
             "StepGoal"
         ],
         "projectType": "native",

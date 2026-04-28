@@ -13,6 +13,7 @@ typedef struct ClaySettings
     bool ShowBattery;
     bool ShowStepProgress;
 	bool ShowBTConnection;
+	bool VibrateOnStepGoal;
     int StepGoal;
 } ClaySettings;
 
