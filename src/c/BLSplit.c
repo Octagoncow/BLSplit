@@ -140,7 +140,7 @@ static void update_steps()
 		if (new_steps != s_step_count) 
 		{
 			// We've just met/surpassed our step goal for the day
-			if(settings.VibrateOnStepGoal && s_step_count != UNINITIALIZED && new_steps >= settings.StepGoal && s_step_count < settings.StepGoal && quiet_time_is_active())
+			if(settings.VibrateOnStepGoal && s_step_count != UNINITIALIZED && new_steps >= settings.StepGoal && s_step_count < settings.StepGoal && !quiet_time_is_active())
 			{
 				//vibrate the watch
 				VibePattern pat = 
