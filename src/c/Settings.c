@@ -9,7 +9,9 @@ void settings_load(ClaySettings *settings)
     settings->BackgroundColor   = GColorBlack;
     settings->DateColor         = GColorWhite;
     settings->BatteryColor      = GColorVeryLightBlue;
-    settings->StepsColor        = GColorOrange;
+    settings->StepsColor1x      = GColorOrange;
+	settings->StepsColor2x      = GColorMagenta;
+	settings->StepsColor3x	    = GColorBabyBlueEyes;
     settings->ShowDate          = true;
     settings->ShowBattery       = true;
     settings->ShowStepProgress  = true;

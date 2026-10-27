@@ -27,8 +27,11 @@ static TextLayer *s_battery_layer, *s_date_layer;
 static GFont s_battery_font, s_date_font;
 static BitmapLayer *s_blade_layer;
 static bool btPreviouslyConnected = true;
+
+#ifndef DEBUG
 // Vibe pattern: ON for 200ms, OFF for 100ms, ON for 400ms:
-static const uint32_t stepGoalAchievedVibePattern[] = { 300, 100, 300, 100, 300, 600, 300, 100, 300, 100, 300};
+static const uint32_t stepGoalAchievedVibePattern[] = { 300, 100, 300, 100, 300, 750, 300, 100, 300, 100, 300};
+#endif
 
 //'normal' blade image
 static GBitmap *s_blade_bitmap;
@@ -49,7 +52,7 @@ static void minutes_update_proc(Layer *layer, GContext *ctx)
 
 static void progress_update_proc(Layer *layer, GContext *ctx) 
 {
-    progress_bar_draw(ctx, layer_get_bounds(layer), s_step_count, settings.StepGoal, settings.StepsColor, settings.BackgroundColor, (int)EDGE_PADDING, 10);
+    progress_bar_draw(ctx, layer_get_bounds(layer), s_step_count, settings.StepGoal, settings.StepsColor1x, settings.StepsColor2x, settings.StepsColor3x, settings.BackgroundColor, (int)EDGE_PADDING, 10);
 }
 
 static void bluetooth_callback(bool connected) 
@@ -117,9 +120,9 @@ static void update_time()
 
 static void update_steps() 
 {
-	int new_steps = 0;
     #ifdef DEBUG
-	s_step_count = 4567;
+	s_step_count = 20000;
+    layer_mark_dirty(s_progress_layer);
 	#else
 	HealthMetric metric = HealthMetricStepCount;
 	time_t start = time_start_of_today();
@@ -127,39 +130,37 @@ static void update_steps()
 
 	HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric, start, end);
 
+	// Only update if health data is actually available. Skipping when unavailable
+	// prevents a failed read (which returns 0) from clobbering s_step_count and
+	// falsely triggering or suppressing the step-goal vibration.
 	if (mask & HealthServiceAccessibilityMaskAvailable) 
 	{
-		new_steps = (int)health_service_sum(metric, start, end);
+		int new_steps = (int)health_service_sum(metric, start, end);
+
+		if (new_steps != s_step_count) 
+		{
+			// We've just met/surpassed our step goal for the day
+			if(settings.VibrateOnStepGoal && s_step_count != UNINITIALIZED && new_steps >= settings.StepGoal && s_step_count < settings.StepGoal && quiet_time_is_active())
+			{
+				//vibrate the watch
+				VibePattern pat = 
+				{
+				  .durations = stepGoalAchievedVibePattern,
+				  .num_segments = ARRAY_LENGTH(stepGoalAchievedVibePattern),
+				};
+				vibes_enqueue_custom_pattern(pat);
+			}
+			s_step_count = new_steps;
+			layer_mark_dirty(s_progress_layer);
+		}
 	}
 	#endif
-    if (new_steps != s_step_count) 
-	{
-		//we've just met/surpassed our step goal for the day
-		if(settings.VibrateOnStepGoal && s_step_count != UNINITIALIZED && new_steps >= settings.StepGoal && s_step_count < settings.StepGoal)
-		{
-			//vibrate the watch
-			VibePattern pat = 
-			{
-			  .durations = stepGoalAchievedVibePattern,
-			  .num_segments = ARRAY_LENGTH(stepGoalAchievedVibePattern),
-			};
-			vibes_enqueue_custom_pattern(pat);
-
-		}
-        s_step_count = new_steps;
-        layer_mark_dirty(s_progress_layer);
-		
-    }
 }
 
 static void tick_handler(struct tm *t, TimeUnits units) 
 {
     update_time();
-	 // only every 5 minutes
-	if (t->tm_min % 5 == 0) 
-	{
-        update_steps();
-    }
+    update_steps();
 }
 
 static void battery_handler(BatteryChargeState state) 
@@ -311,6 +312,7 @@ static void window_unload(Window *window)
 	tick_timer_service_unsubscribe();
     battery_state_service_unsubscribe();
     connection_service_unsubscribe();
+	health_service_events_unsubscribe();
 	unobstructed_area_service_unsubscribe();
 }
 
@@ -323,7 +325,9 @@ static void inbox_received_handler(DictionaryIterator *iter, void *ctx)
         if (t->key == MESSAGE_KEY_BackgroundColor)   settings.BackgroundColor   = GColorFromHEX(t->value->int32);
         if (t->key == MESSAGE_KEY_DateColor)         settings.DateColor         = GColorFromHEX(t->value->int32);
         if (t->key == MESSAGE_KEY_BatteryColor)      settings.BatteryColor      = GColorFromHEX(t->value->int32);
-        if (t->key == MESSAGE_KEY_StepsColor)        settings.StepsColor        = GColorFromHEX(t->value->int32);
+        if (t->key == MESSAGE_KEY_StepsColor1x)      settings.StepsColor1x      = GColorFromHEX(t->value->int32);
+		if (t->key == MESSAGE_KEY_StepsColor2x)      settings.StepsColor2x      = GColorFromHEX(t->value->int32);
+		if (t->key == MESSAGE_KEY_StepsColor3x)      settings.StepsColor3x      = GColorFromHEX(t->value->int32);
         // Visibility toggles
         if (t->key == MESSAGE_KEY_ShowDate)          settings.ShowDate          = (bool)t->value->int8;
         if (t->key == MESSAGE_KEY_ShowBattery)       settings.ShowBattery       = (bool)t->value->int8;
@@ -345,7 +349,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *ctx)
 int main(void) 
 {
     settings_load(&settings);
-    
     app_message_register_inbox_received(inbox_received_handler);
     app_message_open(256, 256);
     
@@ -363,8 +366,5 @@ int main(void)
     
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     battery_state_service_subscribe(battery_handler);
-	update_steps();
-	// Register for Bluetooth connection updates
-	connection_service_subscribe((ConnectionHandlers) { .pebble_app_connection_handler = bluetooth_callback});
     app_event_loop();
 }

@@ -34,7 +34,19 @@ module.exports = [
       },
 		{
         "type": "color",
-        "messageKey": "StepsColor",
+        "messageKey": "StepsColor1x",
+        "defaultValue": "0xFF5500",
+        "label": "Step Progress Color"
+      },
+		{
+        "type": "color",
+        "messageKey": "StepsColor2x",
+        "defaultValue": "0xFF5500",
+        "label": "Step Progress Color"
+      },
+		{
+        "type": "color",
+        "messageKey": "StepsColor3x",
         "defaultValue": "0xFF5500",
         "label": "Step Progress Color"
       }

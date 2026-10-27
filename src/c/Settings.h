@@ -8,7 +8,9 @@ typedef struct ClaySettings
     GColor MinuteColor;
     GColor DateColor;
     GColor BatteryColor;
-    GColor StepsColor;
+    GColor StepsColor1x;
+	GColor StepsColor2x;
+	GColor StepsColor3x;
     bool ShowDate;
     bool ShowBattery;
     bool ShowStepProgress;
